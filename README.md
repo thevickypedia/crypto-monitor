@@ -1,2 +1,2 @@
-# crypto-monitor
-Python script to monitor crypto currencies
+# Cryptocurrency Monitor
+Python scripts to monitor cryptocurrencies.
