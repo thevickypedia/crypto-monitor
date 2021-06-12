@@ -3,11 +3,11 @@ from json import load
 from logging import INFO, basicConfig, getLogger
 from os import listdir
 from pprint import pprint
-from re import findall
 from smtplib import SMTP, SMTPException
 
 from bs4 import BeautifulSoup
 from requests import get
+from yfinance import Ticker
 
 basicConfig(level=INFO, datefmt='%b-%d-%Y %H:%M:%S',
             format='%(asctime)s - %(levelname)s - %(funcName)s - Line: %(lineno)d - %(message)s')
@@ -23,27 +23,31 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
         max_threshold: Maximum value beyond which a notification has to be triggered.
 
     """
-    scrapped = BeautifulSoup(get(f'https://finance.yahoo.com/quote/{ticker}').text, "html.parser")
-    class_name = {'class': 'D(ib) smartphone_Mb(10px) W(70%) W(100%)--mobp smartphone_Mt(6px)'}
-    raw_data = scrapped.find_all('div', class_name)[0]
-    price = float(raw_data.find('span').text.replace(',', ''))
-    price_change = findall(r"\d+\.\d+", str(raw_data))
-    result = None
-    if 'At close' in str(raw_data):
+    raw_data = Ticker(ticker=ticker).info
+    price = raw_data['regularMarketPrice']
+    open_value = raw_data['regularMarketOpen']
+    if difference := price - open_value:
+        if difference < 0:
+            result = 'decreased'
+            difference = - difference
+        else:
+            result = 'increased'
+    else:
         result = 'currently no change. Last change:'
-    elif 'negativeColor' in str(raw_data):
-        result = 'decreased'
-    elif 'positiveColor' in str(raw_data):
-        result = 'increased'
-    logger.info(f"The current price of {ticker} is: ${price}\n{ticker} share has {result} ${price_change[-2]}")
+    prev_result = f"Opening price: {open_value}"
+    curr_result = f"Current price: ${price}"
+    result = f"{ticker} has {result} ${round(difference, 8)} for today."
+    logger.info(curr_result)
+    logger.info(prev_result)
+    logger.info(result)
     message = None
     if price < min_threshold:
-        message = f'{ticker} is currently less than ${min_threshold}.'
+        message = f'Less than ${min_threshold}.'
     elif price > max_threshold:
-        message = f'{ticker} is currently more than ${max_threshold}.'
+        message = f'More than ${max_threshold}.'
     if message:
         logger.info(message)
-        notify(subject=ticker, body=message)
+        notify(subject=ticker, body=message + f"\n{curr_result} {prev_result}\n{result}")
 
 
 def notify(subject: str, body: str):
@@ -119,7 +123,7 @@ if __name__ == '__main__':
              "\tGMAIL_PASS: <sender_id_password>,\n"
              "}")
 
-    analyze(ticker='BTC-USD', max_threshold=37_000, min_threshold=30_000)
+    analyze(ticker='DOGE-USD', max_threshold=1, min_threshold=0.35)
 
     cryptos = {}
     with ThreadPoolExecutor(max_workers=5) as executor:
