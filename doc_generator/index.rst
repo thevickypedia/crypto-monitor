@@ -10,7 +10,7 @@ Welcome to crypto-monitor's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: src.monitor
+.. automodule:: monitor
    :members:
    :undoc-members:
 

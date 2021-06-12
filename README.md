@@ -12,7 +12,7 @@ Python scripts to monitor cryptocurrencies.
 
 ### Requirements
 [params.json](README.md)<br>
-[requirements.txt](src/requirements.txt)
+[requirements.txt](requirements.txt)
 
 ### Docker
 `docker build -t crypto .`<br>

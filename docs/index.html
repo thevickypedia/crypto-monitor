@@ -34,9 +34,9 @@
 <h1>Welcome to crypto-monitor’s documentation!<a class="headerlink" href="#welcome-to-crypto-monitor-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-src.monitor"></span><dl class="py function">
-<dt class="sig sig-object py" id="src.monitor.analyze">
-<span class="sig-prename descclassname"><span class="pre">src.monitor.</span></span><span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threshold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_threshold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.monitor.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-monitor"></span><dl class="py function">
+<dt class="sig sig-object py" id="monitor.analyze">
+<span class="sig-prename descclassname"><span class="pre">monitor.</span></span><span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threshold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_threshold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monitor.analyze" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analyzes the ticker value from finance.yahoo.com and compares with the max and min price value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -50,8 +50,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.monitor.get_all_cryptos">
-<span class="sig-prename descclassname"><span class="pre">src.monitor.</span></span><span class="sig-name descname"><span class="pre">get_all_cryptos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.monitor.get_all_cryptos" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="monitor.get_all_cryptos">
+<span class="sig-prename descclassname"><span class="pre">monitor.</span></span><span class="sig-name descname"><span class="pre">get_all_cryptos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monitor.get_all_cryptos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update a global dictionary with all cryptocurrency ticker values, current price and ticker name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -61,8 +61,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.monitor.notify">
-<span class="sig-prename descclassname"><span class="pre">src.monitor.</span></span><span class="sig-name descname"><span class="pre">notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.monitor.notify" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="monitor.notify">
+<span class="sig-prename descclassname"><span class="pre">monitor.</span></span><span class="sig-name descname"><span class="pre">notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monitor.notify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Notification is triggered when the case status, is other than ‘Case Was Received’.</p>
 <p>Notifies via text message through SMS gateway of destination number.</p>
 <dl class="field-list simple">
