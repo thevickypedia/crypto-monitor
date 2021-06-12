@@ -101,14 +101,14 @@ def get_all_cryptos(offset: int):
 
 
 if __name__ == '__main__':
-    if 'params.json' not in listdir('src'):
+    if 'params.json' not in listdir():
         exit('Script requires a json file (params.json) with credentials stored as key value pairs.')
 
-    if not open('src/params.json').read():
+    if not open('params.json').read():
         logger.error('Credentials file is empty.')
         phone_number, email_sender, email_password = None, None, None
     else:
-        json_file = load(open('src/params.json'))
+        json_file = load(open('params.json'))
         phone_number = json_file.get('PHONE')
         email_sender = json_file.get('GMAIL_USER')
         email_password = json_file.get('GMAIL_PASS')
