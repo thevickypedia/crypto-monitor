@@ -1,0 +1,8 @@
+.gitignore
+.dockerignore
+.pre-commit-config.yaml
+venv
+doc_generator
+docs
+gen_docs.sh
+README.md
