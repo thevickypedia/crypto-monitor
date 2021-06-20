@@ -20,7 +20,7 @@ Python scripts to monitor cryptocurrencies.
 
 <h6>
 Note: DO NOT use <code>alpine</code> for docker as the build dependencies from 
-<a href="https://pypi.org/simple/pandas/">simple/pandas</a> fail due to missing pre-req.<br>
+<a href="https://pypi.org/simple/pandas/">simple/pandas</a> fail due to missing pre-req.<br><br>
 Alternative is to use <code>slim</code> or install the modules directly from <code>alpine</code> 
 <a href="https://pkgs.alpinelinux.org/packages?name=*pandas">repository</a>
 </h6>
