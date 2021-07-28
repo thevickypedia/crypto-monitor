@@ -3,9 +3,9 @@ from json import load
 from logging import INFO, basicConfig, getLogger
 from os import listdir
 from pprint import pprint
-from smtplib import SMTP, SMTPException
 
 from bs4 import BeautifulSoup
+from gmailconnector.send_sms import Messenger
 from requests import get
 from yfinance import Ticker
 
@@ -47,37 +47,10 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
         message = f'More than ${max_threshold}.'
     if message:
         logger.info(message)
-        notify(subject=ticker, body=message + f"\n{curr_result} {prev_result}\n{result}")
-
-
-def notify(subject: str, body: str):
-    """Notification is triggered when the case status, is other than 'Case Was Received'.
-
-    Notifies via text message through SMS gateway of destination number.
-
-    Args:
-        body: Receives the content as argument `body` to send an SMS notification.
-        subject: Receives the title as argument `subject` to send an SMS notification.
-
-    """
-    try:
-        to = f"{phone_number}@tmomail.net"
-        message = (f"From: {email_sender}\n" + f"To: {to}\n" + f"Subject: {subject}\n" + "\n\n" + body)
-        server = SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(user=email_sender, password=email_password)
-        server.sendmail(email_sender, to, message)
-        server.quit()
-        server.close()
-        logger.info('SMS notification has been sent.')
-    except SMTPException as error:
-        if 'Username and Password not accepted' in str(error):
-            logger.error(error)
-            exit(1)
-        else:
-            logger.error('Failed to send SMS. Please check the GMAIL_USER and GMAIL_PASS in params.json.')
-            logger.critical('Logon to https://myaccount.google.com/lesssecureapps and turn ON less secure apps.')
-            exit(error)
+        logger.info(Messenger(
+            gmail_user=gmail_user, gmail_pass=gmail_pass, phone_number=phone_number,
+            subject=ticker, message=message + f"\n{curr_result} {prev_result}\n{result}"
+        ).send_sms())
 
 
 def get_all_cryptos(offset: int):
@@ -87,8 +60,9 @@ def get_all_cryptos(offset: int):
         offset: An offset value is passed to frame the URL as a paginator.
 
     """
-    response = BeautifulSoup(get(url=f'https://finance.yahoo.com/cryptocurrencies?count=100&offset={offset}').text,
-                             "html.parser")
+    response = BeautifulSoup(get(
+        url=f'https://finance.yahoo.com/cryptocurrencies?count=100&offset={offset}').text,
+        parser="html.parser")
     class_ = {'class': 'Ovx(a) Ovx(h)--print Ovy(h) W(100%)'}
     raw_data = response.find_all('div', class_)[0]
     name_list = raw_data.find_all('a', href=True)[::2]  # picks only every 2nd element
@@ -106,14 +80,14 @@ if __name__ == '__main__':
 
     if not open('params.json').read():
         logger.error('Credentials file is empty.')
-        phone_number, email_sender, email_password = None, None, None
+        phone_number, gmail_user, gmail_pass = None, None, None
     else:
         json_file = load(open('params.json'))
         phone_number = json_file.get('PHONE')
-        email_sender = json_file.get('GMAIL_USER')
-        email_password = json_file.get('GMAIL_PASS')
+        gmail_user = json_file.get('GMAIL_USER')
+        gmail_pass = json_file.get('GMAIL_PASS')
 
-    env_vars = [phone_number, email_sender, email_password]
+    env_vars = [phone_number, gmail_user, gmail_pass]
 
     if any(env_var is None for env_var in env_vars):
         exit("Your 'params.json' should appear as following:\n"
