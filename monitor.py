@@ -1,10 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
-from json import load
 from logging import INFO, basicConfig, getLogger
-from os import listdir
+from os import environ, path
 from pprint import pprint
 
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from gmailconnector.send_sms import Messenger
 from requests import get
 from yfinance import Ticker
@@ -36,7 +36,7 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
         result = 'currently no change. Last change:'
     prev_result = f"Opening price: {open_value}"
     curr_result = f"Current price: ${price}"
-    result = f"{ticker} has {result} ${round(difference, 8)} for today."
+    result = f"{ticker} has {result} ${float(round(difference, 4))} for today."
     logger.info(curr_result)
     logger.info(prev_result)
     logger.info(result)
@@ -47,10 +47,15 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
         message = f'More than ${max_threshold}.'
     if message:
         logger.info(message)
-        logger.info(Messenger(
-            gmail_user=gmail_user, gmail_pass=gmail_pass, phone_number=phone_number,
-            subject=ticker, message=message + f"\n{curr_result} {prev_result}\n{result}"
-        ).send_sms())
+        if all([gmail_user, gmail_pass, phone_number]):
+            response = Messenger(gmail_user=gmail_user, gmail_pass=gmail_pass, phone_number=phone_number,
+                                 subject=ticker, message=f"{message}\n{curr_result} {prev_result}\n{result}").send_sms()
+            if response.ok:
+                logger.info('SMS notification has been sent.')
+            else:
+                logger.error(response.json())
+        else:
+            logger.warning('Please store the env vars for PHONE, GMAIL_USER and GMAIL_PASS to enable notifications.')
 
 
 def get_all_cryptos(offset: int):
@@ -58,44 +63,22 @@ def get_all_cryptos(offset: int):
 
     Args:
         offset: An offset value is passed to frame the URL as a paginator.
-
     """
     response = BeautifulSoup(get(
         url=f'https://finance.yahoo.com/cryptocurrencies?count=100&offset={offset}').text,
-        parser="html.parser")
+        parser="html.parser", features="lxml")
     class_ = {'class': 'Ovx(a) Ovx(h)--print Ovy(h) W(100%)'}
-    raw_data = response.find_all('div', class_)[0]
-    name_list = raw_data.find_all('a', href=True)[::2]  # picks only every 2nd element
-    num_list = raw_data.find_all('span', {'class': 'Trsdu(0.3s)'})[::4]  # picks only every 4th element
-    num_list = [each.text for each in num_list]
-    for index, link in enumerate(name_list):
-        title = link.get('title')
-        ticker = link.get('href').split('?p=')[-1]
-        cryptos[num_list[index]] = [ticker, title]  # updated dictionary with ticker, name and current price
+    name_list = response.find_all('div', class_)[0].find_all('a', href=True)[::2]  # picks only every 2nd element
+    [cryptos.update({link.get('href').split('?p=')[-1]: link.get('title')}) for link in name_list]
 
 
 if __name__ == '__main__':
-    if 'params.json' not in listdir():
-        exit('Script requires a json file (params.json) with credentials stored as key value pairs.')
+    if path.isfile('.env'):
+        load_dotenv(dotenv_path='.env', override=True, verbose=True)
 
-    if not open('params.json').read():
-        logger.error('Credentials file is empty.')
-        phone_number, gmail_user, gmail_pass = None, None, None
-    else:
-        json_file = load(open('params.json'))
-        phone_number = json_file.get('PHONE')
-        gmail_user = json_file.get('GMAIL_USER')
-        gmail_pass = json_file.get('GMAIL_PASS')
-
-    env_vars = [phone_number, gmail_user, gmail_pass]
-
-    if any(env_var is None for env_var in env_vars):
-        exit("Your 'params.json' should appear as following:\n"
-             "{\n"
-             "\tPHONE: <phone_number>,\n"
-             "\tGMAIL_USER: <sender_email_address>,\n"
-             "\tGMAIL_PASS: <sender_id_password>,\n"
-             "}")
+    phone_number = environ.get('PHONE')
+    gmail_user = environ.get('GMAIL_USER')
+    gmail_pass = environ.get('GMAIL_PASS')
 
     analyze(ticker='DOGE-USD', max_threshold=1, min_threshold=0.35)
 

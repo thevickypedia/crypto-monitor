@@ -3,4 +3,5 @@ requests==2.25.1
 yfinance==0.1.59
 pre-commit==2.13.0
 sphinx==4.0.2
-gmail-connector
+python-dotenv==0.19.0
+gmail-connector>=0.3.6
