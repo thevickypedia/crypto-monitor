@@ -6,8 +6,7 @@ Python scripts to monitor cryptocurrencies.
 - `SMTP` - Send SMS notification using Simple Mail Transfer Protocol
 
 ### Requirements
-[params.json](README.md)<br>
-[requirements.txt](requirements.txt)
+`pip install --no-cache --upgrade -r requirements.txt`
 
 ### Docker
 `docker build -t crypto .`<br>

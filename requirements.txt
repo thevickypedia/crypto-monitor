@@ -1,5 +1,5 @@
-bs4==0.0.1
-requests==2.25.1
-yfinance==0.1.59
-python-dotenv>=0.19.2
-gmail-connector>=0.5.4
+bs4
+requests
+yfinance
+python-dotenv
+gmail-connector
