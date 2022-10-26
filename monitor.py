@@ -1,17 +1,17 @@
+import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
-from logging import INFO, basicConfig, getLogger
-from os import environ, path
 from pprint import pprint
 
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
+import bs4
+import dotenv
+import requests
+import yfinance
 from gmailconnector.send_sms import Messenger
-from requests import get
-from yfinance import Ticker
 
-basicConfig(level=INFO, datefmt='%b-%d-%Y %H:%M:%S',
-            format='%(asctime)s - %(levelname)s - %(funcName)s - Line: %(lineno)d - %(message)s')
-logger = getLogger('monitor.py')
+logging.basicConfig(level=logging.INFO, datefmt='%b-%d-%Y %H:%M:%S',
+                    format='%(asctime)s - %(levelname)s - %(funcName)s - Line: %(lineno)d - %(message)s')
+logger = logging.getLogger('monitor.py')
 
 
 def analyze(ticker: str, max_threshold: float, min_threshold: float):
@@ -23,7 +23,7 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
         max_threshold: Maximum value beyond which a notification has to be triggered.
 
     """
-    raw_data = Ticker(ticker=ticker).info
+    raw_data = yfinance.Ticker(ticker=ticker).info
     price = raw_data['regularMarketPrice']
     open_value = raw_data['regularMarketOpen']
     if difference := price - open_value:
@@ -48,8 +48,8 @@ def analyze(ticker: str, max_threshold: float, min_threshold: float):
     if message:
         logger.info(message)
         if all([gmail_user, gmail_pass, phone_number]):
-            response = Messenger(gmail_user=gmail_user, gmail_pass=gmail_pass, phone_number=phone_number,
-                                 subject=ticker, message=f"{message}\n{curr_result} {prev_result}\n{result}").send_sms()
+            response = Messenger(gmail_user=gmail_user, gmail_pass=gmail_pass).send_sms(
+                phone=phone_number, subject=ticker, message=f"{message}\n{curr_result} {prev_result}\n{result}")
             if response.ok:
                 logger.info('SMS notification has been sent.')
             else:
@@ -64,7 +64,7 @@ def get_all_cryptos(offset: int):
     Args:
         offset: An offset value is passed to frame the URL as a paginator.
     """
-    response = BeautifulSoup(get(
+    response = bs4.BeautifulSoup(requests.get(
         url=f'https://finance.yahoo.com/cryptocurrencies?count=100&offset={offset}').text,
         parser="html.parser", features="lxml")
     class_ = {'class': 'Ovx(a) Ovx(h)--print Ovy(h) W(100%)'}
@@ -73,12 +73,12 @@ def get_all_cryptos(offset: int):
 
 
 if __name__ == '__main__':
-    if path.isfile('.env'):
-        load_dotenv(dotenv_path='.env', override=True, verbose=True)
+    if os.path.isfile('.env'):
+        dotenv.load_dotenv(dotenv_path='.env', override=True, verbose=True)
 
-    phone_number = environ.get('PHONE')
-    gmail_user = environ.get('GMAIL_USER')
-    gmail_pass = environ.get('GMAIL_PASS')
+    phone_number = os.environ.get('PHONE')
+    gmail_user = os.environ.get('GMAIL_USER')
+    gmail_pass = os.environ.get('GMAIL_PASS')
 
     analyze(ticker='DOGE-USD', max_threshold=1, min_threshold=0.35)
 
